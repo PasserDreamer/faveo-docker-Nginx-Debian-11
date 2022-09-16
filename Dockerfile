@@ -3,11 +3,11 @@ FROM nginx
 MAINTAINER Ladybird Web Solutions <support@ladybirdweb.com>
 
 # Install necessary packages 
-RUN apt-get update -y && apt-get install -y apt-transport-https ca-certificates wget
+RUN apt-get update -y && apt-get install -y apt-transport-https ca-certificates wget software-properties-common
 
-RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+RUN curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg
 
-RUN echo "deb https://packages.sury.org/php/ jessie main" > /etc/apt/sources.list.d/php.list
+RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
 
 
 RUN apt-get update -y && apt-get install -y curl git sl mlocate dos2unix \
@@ -23,9 +23,6 @@ RUN sed -i 's/user  nginx/user  www-data/g' /etc/nginx/nginx.conf
 
 # Force PHP to log to nginx
 RUN echo "catch_workers_output = yes" >> /etc/php/7.1/fpm/php-fpm.conf
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-        && ln -sf /dev/stderr /var/log/nginx/error.log
 
 # Enable php by default
 ADD default.conf /etc/nginx/conf.d/default.conf
